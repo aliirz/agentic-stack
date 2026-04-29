@@ -79,6 +79,27 @@ switch ($Adapter) {
 
 Write-Host "done."
 
+# Ensure Python bytecode/cache files are ignored in the target repo.
+$gitignorePath = Join-Path $TargetDir '.gitignore'
+if (-not (Test-Path $gitignorePath -PathType Leaf)) {
+    New-Item -ItemType File -Path $gitignorePath -Force | Out-Null
+}
+
+$gitignoreLines = Get-Content $gitignorePath -ErrorAction SilentlyContinue
+$addedGitignoreRule = $false
+
+if ($gitignoreLines -notcontains '__pycache__/') {
+    Add-Content -Path $gitignorePath -Value '__pycache__/'
+    $addedGitignoreRule = $true
+}
+if ($gitignoreLines -notcontains '*.py[cod]') {
+    Add-Content -Path $gitignorePath -Value '*.py[cod]'
+    $addedGitignoreRule = $true
+}
+if ($addedGitignoreRule) {
+    Write-Host "  + updated .gitignore (python bytecode/cache)"
+}
+
 # ── Onboarding wizard ──────────────────────────────────────────────
 $OnboardPy = Join-Path $Here 'onboard.py'
 if (-not (Test-Path $OnboardPy -PathType Leaf)) {
