@@ -96,6 +96,25 @@ esac
 
 echo "done."
 
+# Ensure Python bytecode/cache files are ignored in the target repo.
+GITIGNORE="$TARGET/.gitignore"
+if [[ ! -f "$GITIGNORE" ]]; then
+  touch "$GITIGNORE"
+fi
+
+added_gitignore_rule=0
+if ! grep -Fxq "__pycache__/" "$GITIGNORE"; then
+  echo "__pycache__/" >> "$GITIGNORE"
+  added_gitignore_rule=1
+fi
+if ! grep -Fxq "*.py[cod]" "$GITIGNORE"; then
+  echo "*.py[cod]" >> "$GITIGNORE"
+  added_gitignore_rule=1
+fi
+if [[ "$added_gitignore_rule" -eq 1 ]]; then
+  echo "  + updated .gitignore (python bytecode/cache)"
+fi
+
 # ── Onboarding wizard ──────────────────────────────────────────────────────
 ONBOARD_PY="$HERE/onboard.py"
 if [[ ! -f "$ONBOARD_PY" ]]; then
